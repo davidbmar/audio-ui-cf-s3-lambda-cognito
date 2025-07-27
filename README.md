@@ -1,3 +1,6 @@
+# This is more deprecated, use cognito-lambda-s3-webserver-cloudfront instead.
+
+
 # CloudDrive with Audio Recording - Serverless Personal Cloud Platform
 
 A modern, secure personal cloud platform built with AWS serverless technologies. Features both file management and audio recording capabilities with a beautiful responsive interface optimized for mobile devices.
