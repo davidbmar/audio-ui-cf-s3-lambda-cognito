@@ -21,8 +21,14 @@ if ! command_exists aws; then
     exit 1
 fi
 
-if ! command_exists serverless; then
-    echo "❌ Serverless Framework is not installed. Please install it first."
+if ! command_exists npx; then
+    echo "❌ npx is not installed. Please install Node.js/npm first."
+    exit 1
+fi
+
+# Check if serverless is available via npx
+if ! npx serverless --version &> /dev/null; then
+    echo "❌ Serverless Framework is not installed locally. Please run 'npm install' first."
     exit 1
 fi
 
@@ -93,7 +99,7 @@ fi
 
 # Deploy using serverless
 echo "🔧 Deploying Lambda functions..."
-if serverless deploy --config $SERVERLESS_FILE; then
+if npx serverless deploy --config $SERVERLESS_FILE; then
     echo "✅ Lambda functions deployed successfully"
 else
     echo "❌ Failed to deploy Lambda functions"

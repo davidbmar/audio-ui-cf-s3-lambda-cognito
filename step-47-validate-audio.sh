@@ -68,30 +68,32 @@ echo "🔧 Test 2: Checking Lambda function deployment..."
 STACK_NAME="${APP_NAME}-${STAGE}"
 
 # Check if the stack exists and has audio functions
-FUNCTIONS=$(aws cloudformation describe-stack-resources \
+# Use list-stack-resources with max-items to get all Lambda functions
+FUNCTIONS=$(aws cloudformation list-stack-resources \
     --stack-name "$STACK_NAME" \
-    --query 'StackResources[?ResourceType==`AWS::Lambda::Function`].LogicalResourceId' \
+    --max-items 200 \
+    --query 'StackResourceSummaries[?ResourceType==`AWS::Lambda::Function`].LogicalResourceId' \
     --output text 2>/dev/null || echo "")
 
-if echo "$FUNCTIONS" | grep -q "uploadAudioChunk"; then
+if echo "$FUNCTIONS" | grep -q "UploadAudioChunkLambdaFunction"; then
     echo "✅ uploadAudioChunk Lambda function deployed"
 else
-    echo "❌ uploadAudioChunk Lambda function not found"
+    echo "❌ uploadAudioChunk Lambda function not found in CloudFormation"
 fi
 
-if echo "$FUNCTIONS" | grep -q "updateAudioSessionMetadata"; then
+if echo "$FUNCTIONS" | grep -q "UpdateAudioSessionMetadataLambdaFunction"; then
     echo "✅ updateAudioSessionMetadata Lambda function deployed"
 else
     echo "❌ updateAudioSessionMetadata Lambda function not found"
 fi
 
-if echo "$FUNCTIONS" | grep -q "listAudioSessions"; then
+if echo "$FUNCTIONS" | grep -q "ListAudioSessionsLambdaFunction"; then
     echo "✅ listAudioSessions Lambda function deployed"
 else
     echo "❌ listAudioSessions Lambda function not found"
 fi
 
-if echo "$FUNCTIONS" | grep -q "getFailedAudioChunks"; then
+if echo "$FUNCTIONS" | grep -q "GetFailedAudioChunksLambdaFunction"; then
     echo "✅ getFailedAudioChunks Lambda function deployed"
 else
     echo "❌ getFailedAudioChunks Lambda function not found"
