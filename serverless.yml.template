@@ -275,6 +275,21 @@ functions:
             authorizerId:
               Ref: ApiGatewayAuthorizer
 
+  # Delete audio chunk function
+  deleteAudioChunk:
+    handler: api/audio.deleteChunk
+    environment:
+      S3_BUCKET_NAME: ${self:custom.s3Bucket}
+    events:
+      - http:
+          path: api/audio/delete-chunk
+          method: delete
+          cors: true
+          authorizer:
+            type: COGNITO_USER_POOLS
+            authorizerId:
+              Ref: ApiGatewayAuthorizer
+
 resources:
   Resources:
     # API Gateway Authorizer

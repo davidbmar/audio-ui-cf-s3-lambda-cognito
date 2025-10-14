@@ -404,7 +404,87 @@ module.exports.getFailedChunks = async (event) => {
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Credentials': true,
       },
-      body: JSON.stringify({ 
+      body: JSON.stringify({
+        error: error.message,
+        timestamp: new Date().toISOString()
+      }),
+    };
+  }
+};
+
+// Delete audio chunk from S3
+module.exports.deleteChunk = async (event) => {
+  try {
+    // Get user claims from the authorizer
+    const claims = event.requestContext?.authorizer?.claims || {};
+    const userId = claims.sub || 'unknown';
+    const email = claims.email || 'Anonymous';
+
+    console.log(`User ${email} (${userId}) deleting audio chunk`);
+
+    // Get bucket name from environment variable
+    const bucketName = process.env.S3_BUCKET_NAME;
+    if (!bucketName) {
+      throw new Error('S3_BUCKET_NAME environment variable not set');
+    }
+
+    // Parse request body
+    const body = JSON.parse(event.body || '{}');
+    const { sessionId, chunkNumber } = body;
+
+    // Validate required fields
+    if (!sessionId || chunkNumber === undefined) {
+      return {
+        statusCode: 400,
+        headers: {
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Credentials': true,
+        },
+        body: JSON.stringify({ error: 'sessionId and chunkNumber are required' }),
+      };
+    }
+
+    // Sanitize session ID
+    const sanitizedSessionId = sessionId.replace(/[^a-zA-Z0-9\-_]/g, '');
+    const timestamp = new Date().toISOString().split('T')[0];
+    const paddedChunkNumber = chunkNumber.toString().padStart(3, '0');
+
+    // Build S3 key with user isolation
+    const s3Key = `users/${userId}/audio/sessions/${timestamp}-${sanitizedSessionId}/chunk-${paddedChunkNumber}.webm`;
+
+    console.log(`Deleting chunk ${chunkNumber} from ${s3Key}`);
+
+    // Delete object from S3
+    await s3.deleteObject({
+      Bucket: bucketName,
+      Key: s3Key
+    }).promise();
+
+    console.log(`Successfully deleted chunk ${chunkNumber} of session ${sanitizedSessionId}`);
+
+    return {
+      statusCode: 200,
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Credentials': true,
+      },
+      body: JSON.stringify({
+        message: 'Chunk deleted successfully',
+        sessionId: sanitizedSessionId,
+        chunkNumber: chunkNumber,
+        s3Key: s3Key,
+        timestamp: new Date().toISOString()
+      }),
+    };
+  } catch (error) {
+    console.error('Error deleting audio chunk:', error);
+    return {
+      statusCode: 500,
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Credentials': true,
+      },
+      body: JSON.stringify({
         error: error.message,
         timestamp: new Date().toISOString()
       }),

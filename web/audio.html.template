@@ -567,21 +567,43 @@
                 }
             };
 
-            const handleDelete = (id) => {
+            const handleDelete = async (id) => {
                 const recording = recordings.find(r => r.id === id);
-                if (recording?.audioUrl) {
-                    URL.revokeObjectURL(recording.audioUrl);
-                }
-                
-                if (playingId === id) {
-                    if (audioElementRef.current) {
-                        audioElementRef.current.pause();
-                        audioElementRef.current = null;
+                if (!recording) return;
+
+                try {
+                    log(`Deleting chunk ${recording.chunkNumber} from S3...`);
+
+                    // Call delete API
+                    await makeAuthenticatedRequest(`${config.audioApiUrl}/delete-chunk`, {
+                        method: 'DELETE',
+                        body: JSON.stringify({
+                            sessionId: recording.sessionId,
+                            chunkNumber: recording.chunkNumber
+                        })
+                    });
+
+                    log(`Chunk ${recording.chunkNumber} deleted successfully from S3`);
+
+                    // Clean up local resources
+                    if (recording?.audioUrl) {
+                        URL.revokeObjectURL(recording.audioUrl);
                     }
-                    setPlayingId(null);
+
+                    if (playingId === id) {
+                        if (audioElementRef.current) {
+                            audioElementRef.current.pause();
+                            audioElementRef.current = null;
+                        }
+                        setPlayingId(null);
+                    }
+
+                    // Remove from local state
+                    setRecordings(prev => prev.filter(r => r.id !== id));
+                } catch (error) {
+                    log(`Error deleting chunk: ${error.message}`);
+                    alert(`Failed to delete: ${error.message}`);
                 }
-                
-                setRecordings(prev => prev.filter(r => r.id !== id));
             };
 
             const getSyncStatusIcon = (syncStatus) => {
