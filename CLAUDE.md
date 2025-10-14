@@ -21,11 +21,11 @@ npm run lint
 npm run typecheck
 
 # Deploy in sequence (numbered step system)
-./step-10-setup.sh           # Initial AWS setup
-./step-20-deploy-lambda.sh   # Deploy Lambda functions  
+./step-10-setup.sh            # Initial AWS setup
+./step-20-deploy.sh           # Deploy Lambda functions (adds AUDIO_API_ENDPOINT)
 ./step-25-update-web-files.sh # Deploy web files with env substitution
-./step-45-validation.sh      # Validate deployment
-./step-47-test-apis.sh       # Test API endpoints
+./step-45-setup-audio.sh      # Setup audio functionality (optional)
+./step-47-validate-audio.sh   # Validate audio deployment
 ```
 
 ### Template System:
