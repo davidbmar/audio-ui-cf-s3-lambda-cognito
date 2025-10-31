@@ -420,7 +420,7 @@ async function listS3Files() {
             </div>
         `;
         
-        const response = await fetch(`${config.appUrl}/api/s3/list?prefix=`, {
+        const response = await fetch(`${config.s3ApiUrl}/api/s3/list?prefix=`, {
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${idToken}`,
@@ -677,7 +677,7 @@ async function downloadFile(fullKey, displayName, index) {
         console.log(`Requesting download URL for: ${fullKey}`);
         
         const encodedKey = encodeURIComponent(fullKey);
-        const response = await fetch(`${config.appUrl}/api/s3/download/${encodedKey}`, {
+        const response = await fetch(`${config.s3ApiUrl}/api/s3/download/${encodedKey}`, {
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${idToken}`,
@@ -799,7 +799,7 @@ async function loadMemoryFiles(scope = 'public') {
         }
         
         // Use the S3 list API with custom prefix and no user scoping
-        const response = await fetch(`${config.appUrl}/api/s3/list?prefix=${encodeURIComponent(prefix)}&userScope=false`, {
+        const response = await fetch(`${config.s3ApiUrl}/api/s3/list?prefix=${encodeURIComponent(prefix)}&userScope=false`, {
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${idToken}`,
@@ -841,7 +841,7 @@ async function loadMemoryFiles(scope = 'public') {
                         <div class="upload-instructions">
                             <strong>Test the memory system:</strong><br>
                             Use the Chrome extension to capture Claude's memory outputs, or test with:<br>
-                            <code>curl -X POST ${config.appUrl}/api/memory/public -H "Content-Type: application/json" -d '{"test": "memory"}'</code>
+                            <code>curl -X POST ${config.s3ApiUrl}/api/memory/public -H "Content-Type: application/json" -d '{"test": "memory"}'</code>
                         </div>
                     ` : ''}
                 </div>
@@ -913,7 +913,7 @@ async function displayMemoryFile(file) {
     // Load and display memory content
     try {
         const encodedKey = encodeURIComponent(file.key);
-        const response = await fetch(`${config.appUrl}/api/s3/download/${encodedKey}`, {
+        const response = await fetch(`${config.s3ApiUrl}/api/s3/download/${encodedKey}`, {
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${idToken}`,
@@ -966,7 +966,7 @@ async function downloadMemoryFile(fileKey) {
     
     try {
         const encodedKey = encodeURIComponent(fileKey);
-        const response = await fetch(`${config.appUrl}/api/s3/download/${encodedKey}`, {
+        const response = await fetch(`${config.s3ApiUrl}/api/s3/download/${encodedKey}`, {
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${idToken}`,
@@ -1178,7 +1178,7 @@ async function uploadFile(item, index) {
         updateUploadQueue();
         
         // Get presigned URL
-        const response = await fetch(`${config.appUrl}/api/s3/upload`, {
+        const response = await fetch(`${config.s3ApiUrl}/api/s3/upload`, {
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${idToken}`,
@@ -1305,7 +1305,7 @@ async function createFolder() {
         const markerFileName = folderPath + '.folder';
         
         // Get upload URL for marker file
-        const response = await fetch(`${config.appUrl}/api/s3/upload`, {
+        const response = await fetch(`${config.s3ApiUrl}/api/s3/upload`, {
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${idToken}`,
@@ -1381,7 +1381,7 @@ async function deleteFile(fileKey, displayName, isFolder = false) {
         console.log(`Deleting ${itemType}: ${fileKey}`);
         
         const encodedKey = encodeURIComponent(fileKey);
-        const response = await fetch(`${config.appUrl}/api/s3/delete/${encodedKey}`, {
+        const response = await fetch(`${config.s3ApiUrl}/api/s3/delete/${encodedKey}`, {
             method: 'DELETE',
             headers: {
                 'Authorization': `Bearer ${idToken}`,
@@ -1520,7 +1520,7 @@ async function renameFile(fileKey, oldName, isFolder) {
         try {
             console.log(`Renaming ${fileKey} to ${sanitizedName}`);
             
-            const response = await fetch(`${config.appUrl}/api/s3/rename`, {
+            const response = await fetch(`${config.s3ApiUrl}/api/s3/rename`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${idToken}`,
@@ -1634,7 +1634,7 @@ async function showMoveModal(fileKey, fileName, isFolder) {
     
     try {
         // Fetch all files to build folder structure
-        const response = await fetch(`${config.appUrl}/api/s3/list?prefix=`, {
+        const response = await fetch(`${config.s3ApiUrl}/api/s3/list?prefix=`, {
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${idToken}`,
@@ -1797,7 +1797,7 @@ async function executeMoveOperation(sourceKey, fileName, destinationPath, isFold
             destinationPath: destinationPath
         });
         
-        const response = await fetch(`${config.appUrl}/api/s3/move`, {
+        const response = await fetch(`${config.s3ApiUrl}/api/s3/move`, {
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${idToken}`,
